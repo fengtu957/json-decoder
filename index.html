@@ -90,13 +90,14 @@
       }
 
       .panel {
-        flex: 1;
+        flex: 1 1 50%;
         background: var(--panel);
         border: 1px solid var(--border);
         border-radius: 10px;
         display: flex;
         flex-direction: column;
         box-shadow: 0 12px 30px rgba(31, 38, 51, 0.1);
+        min-width: 0;
       }
 
       .panel-header {
@@ -120,6 +121,8 @@
         padding: 16px 18px;
         line-height: 1.5;
         color: var(--text);
+        white-space: pre;
+        overflow: auto;
       }
 
       textarea::placeholder {
@@ -148,6 +151,7 @@
         overflow: auto;
         font-family: var(--font-mono);
         font-size: 13px;
+        white-space: pre;
       }
 
       .placeholder {
@@ -198,12 +202,11 @@
       }
 
       .node-value {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 4px;
+        display: block;
         padding: 4px 0 4px 16px;
         color: var(--text);
-        align-items: baseline;
+        white-space: pre;
+        overflow: auto;
       }
 
       .token {
@@ -290,9 +293,12 @@
       const treeView = document.getElementById("tree-view");
       const statusEl = document.getElementById("status");
 
-      document
-        .getElementById("format-btn")
-        .addEventListener("click", () => formatJson(2));
+      document.getElementById("format-btn").addEventListener("click", () => {
+        const canProceed = removeEscapes({ silent: true });
+        if (canProceed) {
+          formatJson(2);
+        }
+      });
       document
         .getElementById("compact-btn")
         .addEventListener("click", () => formatJson(0));
@@ -331,6 +337,7 @@
             ? JSON.stringify(parsed, null, indent)
             : JSON.stringify(parsed);
           inputEl.value = formatted;
+          resetInputScroll();
           renderTree(parsed);
           updateStatus("格式化成功", "success");
         } catch (error) {
@@ -475,25 +482,35 @@
         statusEl.className = `status ${type || ""}`;
       }
 
-      function removeEscapes() {
+      function removeEscapes(options = {}) {
+        const { silent = false } = options;
         const raw = inputEl.value;
         if (!raw) {
-          updateStatus("没有可处理的内容", "muted");
-          return;
+          if (!silent) {
+            updateStatus("没有可处理的内容", "muted");
+          }
+          return true;
         }
 
         if (!raw.includes("\\")) {
-          updateStatus("未检测到需要去除的转义字符", "muted");
-          return;
+          if (!silent) {
+            updateStatus("未检测到需要去除的转义字符", "muted");
+          }
+          return true;
         }
 
         try {
           const unescaped = decodeJsonEscapes(raw);
           inputEl.value = unescaped;
-          updateStatus("已去除转义", "success");
+          resetInputScroll();
+          if (!silent) {
+            updateStatus("已去除转义", "success");
+          }
           safeRenderJson(unescaped);
+          return true;
         } catch (error) {
           updateStatus(`去除转义失败：${error.message}`, "error");
+          return false;
         }
       }
 
@@ -507,6 +524,7 @@
         try {
           const escaped = JSON.stringify(raw).slice(1, -1);
           inputEl.value = escaped;
+          resetInputScroll();
           updateStatus("已添加转义字符", "success");
         } catch (error) {
           updateStatus(`添加转义失败：${error.message}`, "error");
@@ -553,6 +571,7 @@
           (char) => "\\u" + char.charCodeAt(0).toString(16).padStart(4, "0")
         );
         inputEl.value = converted;
+        resetInputScroll();
         updateStatus("已转换为 Unicode 转义", "success");
       }
 
@@ -567,8 +586,14 @@
           (_, code) => String.fromCharCode(parseInt(code, 16))
         );
         inputEl.value = converted;
+        resetInputScroll();
         updateStatus("已将 Unicode 转义还原为中文", "success");
         safeRenderJson(converted);
+      }
+
+      function resetInputScroll() {
+        inputEl.scrollLeft = 0;
+        inputEl.scrollTop = 0;
       }
     </script>
   </body>
