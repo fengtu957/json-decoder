@@ -33,33 +33,30 @@
         flex-direction: column;
       }
 
-      header {
-        padding: 20px clamp(16px, 4vw, 48px) 10px;
-        font-size: 18px;
+      .panel-header {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border);
+        font-size: 14px;
         font-weight: 600;
-      }
-
-      header span {
-        display: block;
-        font-size: 13px;
-        font-weight: 400;
-        color: var(--muted);
-        margin-top: 4px;
-      }
-
-      .toolbar {
         display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .panel-header .panel-actions {
+        display: flex;
+        gap: 6px;
         flex-wrap: wrap;
-        gap: 10px;
-        padding: 0 clamp(16px, 4vw, 48px) 16px;
+        justify-content: flex-start;
       }
 
       button {
         appearance: none;
         border: 1px solid transparent;
         border-radius: 6px;
-        padding: 8px 16px;
-        font-size: 14px;
+        padding: 6px 12px;
+        font-size: 13px;
         background: var(--panel);
         color: var(--text);
         cursor: pointer;
@@ -87,6 +84,7 @@
         display: flex;
         gap: 16px;
         padding: 0 clamp(16px, 4vw, 48px) clamp(16px, 3vw, 32px);
+        margin-top: 20px;
       }
 
       .panel {
@@ -98,16 +96,6 @@
         flex-direction: column;
         box-shadow: 0 12px 30px rgba(31, 38, 51, 0.1);
         min-width: 0;
-      }
-
-      .panel-header {
-        padding: 14px 18px;
-        border-bottom: 1px solid var(--border);
-        font-size: 14px;
-        font-weight: 600;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
       }
 
       textarea {
@@ -245,29 +233,19 @@
     </style>
   </head>
   <body>
-    <header>
-      JSON 在线格式化工具
-      <span>轻量纯前端实现</span>
-    </header>
-
-    <section class="toolbar">
-      <button class="primary" id="format-btn">格式化</button>
-      <button id="compact-btn">压缩</button>
-      <button id="unescape-btn">去除转义</button>
-      <button id="escape-btn">添加转义</button>
-      <button id="cn2unicode-btn">中文转 Unicode</button>
-      <button id="unicode2cn-btn">Unicode 转中文</button>
-      <button id="clear-btn">清空</button>
-      <button id="copy-btn">复制结果</button>
-    </section>
-
     <main>
       <section class="panel">
         <div class="panel-header">
-          输入区
-          <span style="font-weight: 400; color: var(--muted); font-size: 13px"
-            >支持中文与 Unicode</span
-          >
+          <div class="panel-actions">
+            <button class="primary" id="format-btn">格式化</button>
+            <button id="compact-btn">压缩</button>
+            <button id="unescape-btn">去除转义</button>
+            <button id="escape-btn">添加转义</button>
+            <button id="cn2unicode-btn">中文转 Unicode</button>
+            <button id="unicode2cn-btn">Unicode 转中文</button>
+            <button id="clear-btn">清空</button>
+            <button id="copy-btn">复制结果</button>
+          </div>
         </div>
         <textarea
           id="json-input"
