@@ -1,4 +1,4 @@
-# JSON Decoder
+# JSON Format
 
 轻量级 JSON 在线格式化/树形查看工具，单页应用只有一个 `index.html`，可直接在浏览器打开或通过容器部署。
 
