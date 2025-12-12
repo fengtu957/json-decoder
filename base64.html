@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Base64 在线编码解码工具</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f6fa;
+        --panel: #fff;
+        --border: #e3e5ed;
+        --text: #1f2633;
+        --muted: #6c7485;
+        --accent: #1f7aec;
+        --danger: #f04438;
+        --success: #12b886;
+        --font-mono: "Fira Code", "Consolas", "Monaco", "SFMono-Regular", monospace;
+        --font-sans: "Segoe UI", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: var(--font-sans);
+        color: var(--text);
+        background: var(--bg);
+        display: flex;
+        flex-direction: row;
+      }
+
+      .sidebar {
+        width: 50px;
+        background: var(--panel);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        padding: 12px 0;
+        gap: 8px;
+        box-shadow: 2px 0 8px rgba(31, 38, 51, 0.05);
+      }
+
+      .sidebar-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 40px;
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 20px;
+        transition: all 120ms ease;
+        position: relative;
+      }
+
+      .sidebar-link:hover {
+        color: var(--accent);
+        background: rgba(31, 122, 236, 0.08);
+      }
+
+      .sidebar-link.active {
+        color: var(--accent);
+        background: rgba(31, 122, 236, 0.12);
+      }
+
+      .sidebar-link.active::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 8px;
+        bottom: 8px;
+        width: 3px;
+        background: var(--accent);
+        border-radius: 0 2px 2px 0;
+      }
+
+      .main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+
+      .panel-header {
+        padding: 10px 18px;
+        border-bottom: 1px solid var(--border);
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        height: 48px;
+        box-sizing: border-box;
+      }
+
+      .panel-header .panel-actions {
+        display: flex;
+        gap: 4px;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        align-items: center;
+        overflow-x: auto;
+        overflow-y: hidden;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .panel-header .panel-actions::-webkit-scrollbar {
+        height: 4px;
+      }
+
+      .panel-header .panel-actions::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 2px;
+      }
+
+      button {
+        appearance: none;
+        border: 1px solid transparent;
+        border-radius: 5px;
+        padding: 4px 10px;
+        font-size: 12px;
+        background: var(--panel);
+        color: var(--text);
+        cursor: pointer;
+        box-shadow: 0 1px 2px rgba(31, 38, 51, 0.08);
+        transition: transform 120ms ease, box-shadow 120ms ease;
+      }
+
+      button.primary {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 14px rgba(31, 38, 51, 0.2);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      main {
+        flex: 1;
+        display: flex;
+        gap: 16px;
+        padding: 0 clamp(16px, 4vw, 48px) clamp(16px, 3vw, 32px);
+        margin-top: 20px;
+      }
+
+      .panel {
+        flex: 1 1 50%;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 12px 30px rgba(31, 38, 51, 0.1);
+        min-width: 0;
+      }
+
+      textarea {
+        flex: 1;
+        width: 100%;
+        resize: none;
+        border: none;
+        outline: none;
+        font-family: var(--font-mono);
+        font-size: 14px;
+        padding: 16px 18px;
+        line-height: 1.5;
+        color: var(--text);
+        white-space: pre;
+        overflow: auto;
+      }
+
+      textarea::placeholder {
+        color: var(--muted);
+      }
+
+      .status {
+        padding: 10px 18px;
+        border-top: 1px solid var(--border);
+        font-size: 13px;
+        color: var(--muted);
+        min-height: 40px;
+      }
+
+      .status.success {
+        color: var(--success);
+      }
+
+      .status.error {
+        color: var(--danger);
+      }
+
+      @media (max-width: 960px) {
+        main {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="sidebar">
+      <a href="index.html" class="sidebar-link" title="JSON 格式化">{ }</a>
+      <a href="base64.html" class="sidebar-link active" title="Base64 编码">B64</a>
+      <a href="timestamp.html" class="sidebar-link" title="时间戳转换">🕐</a>
+    </nav>
+    <div class="main-content">
+    <main>
+      <section class="panel">
+        <div class="panel-header">
+          <span>输入文本</span>
+          <div class="panel-actions">
+            <button class="primary" id="encode-btn">编码</button>
+            <button id="clear-input-btn">清空</button>
+            <button id="copy-input-btn">复制</button>
+          </div>
+        </div>
+        <textarea
+          id="input-text"
+          spellcheck="false"
+          placeholder="在此输入要编码的文本，支持中文..."
+        ></textarea>
+        <div class="status" id="input-status">等待输入...</div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <span>Base64 结果</span>
+          <div class="panel-actions">
+            <button class="primary" id="decode-btn">解码</button>
+            <button id="clear-output-btn">清空</button>
+            <button id="copy-output-btn">复制</button>
+          </div>
+        </div>
+        <textarea
+          id="output-text"
+          spellcheck="false"
+          placeholder="Base64 编码结果将显示在这里，也可以直接在这里输入 Base64 进行解码..."
+        ></textarea>
+        <div class="status" id="output-status">等待操作...</div>
+      </section>
+    </main>
+    </div>
+
+    <script>
+      const inputEl = document.getElementById("input-text");
+      const outputEl = document.getElementById("output-text");
+      const inputStatusEl = document.getElementById("input-status");
+      const outputStatusEl = document.getElementById("output-status");
+
+      const HISTORY_LIMIT = 200;
+      const inputHistory = createHistory();
+      const outputHistory = createHistory();
+
+      function createHistory() {
+        return {
+          stack: [],
+          index: -1,
+          push(value) {
+            if (this.index >= 0 && this.stack[this.index] === value) {
+              return;
+            }
+            if (this.index < this.stack.length - 1) {
+              this.stack = this.stack.slice(0, this.index + 1);
+            }
+            this.stack.push(value);
+            if (this.stack.length > HISTORY_LIMIT) {
+              this.stack.shift();
+              this.index = this.stack.length - 1;
+            } else {
+              this.index += 1;
+            }
+          },
+          undo() {
+            if (this.index <= 0) return null;
+            this.index -= 1;
+            return this.stack[this.index];
+          },
+          redo() {
+            if (this.index >= this.stack.length - 1) return null;
+            this.index += 1;
+            return this.stack[this.index];
+          },
+        };
+      }
+
+      inputHistory.push(inputEl.value || "");
+      outputHistory.push(outputEl.value || "");
+
+      // 编码按钮
+      document.getElementById("encode-btn").addEventListener("click", () => {
+        const text = inputEl.value;
+        if (!text.trim()) {
+          updateStatus(inputStatusEl, "请输入要编码的文本", "muted");
+          return;
+        }
+
+        try {
+          // 使用 UTF-8 编码支持中文
+          const encoded = btoa(unescape(encodeURIComponent(text)));
+          setTextValue(outputEl, encoded, outputHistory);
+          updateStatus(inputStatusEl, "编码成功", "success");
+          updateStatus(outputStatusEl, `已生成 Base64（${encoded.length} 字符）`, "success");
+        } catch (error) {
+          updateStatus(inputStatusEl, `编码失败：${error.message}`, "error");
+        }
+      });
+
+      // 解码按钮
+      document.getElementById("decode-btn").addEventListener("click", () => {
+        const text = outputEl.value;
+        if (!text.trim()) {
+          updateStatus(outputStatusEl, "请输入要解码的 Base64 文本", "muted");
+          return;
+        }
+
+        try {
+          // 使用 UTF-8 解码支持中文
+          const decoded = decodeURIComponent(escape(atob(text.trim())));
+          setTextValue(inputEl, decoded, inputHistory);
+          updateStatus(outputStatusEl, "解码成功", "success");
+          updateStatus(inputStatusEl, `已还原文本（${decoded.length} 字符）`, "success");
+        } catch (error) {
+          updateStatus(outputStatusEl, `解码失败：${error.message}`, "error");
+        }
+      });
+
+      // 清空按钮
+      document.getElementById("clear-input-btn").addEventListener("click", () => {
+        setTextValue(inputEl, "", inputHistory);
+        updateStatus(inputStatusEl, "内容已清空", "muted");
+      });
+
+      document.getElementById("clear-output-btn").addEventListener("click", () => {
+        setTextValue(outputEl, "", outputHistory);
+        updateStatus(outputStatusEl, "内容已清空", "muted");
+      });
+
+      // 复制按钮
+      document.getElementById("copy-input-btn").addEventListener("click", () => {
+        copyText(inputEl, inputStatusEl);
+      });
+
+      document.getElementById("copy-output-btn").addEventListener("click", () => {
+        copyText(outputEl, outputStatusEl);
+      });
+
+      // 历史记录
+      inputEl.addEventListener("input", () => {
+        inputHistory.push(inputEl.value);
+      });
+
+      outputEl.addEventListener("input", () => {
+        outputHistory.push(outputEl.value);
+      });
+
+      // 撤销/重做快捷键
+      inputEl.addEventListener("keydown", (event) => {
+        handleHistoryKeydown(event, inputEl, inputHistory, inputStatusEl);
+      });
+
+      outputEl.addEventListener("keydown", (event) => {
+        handleHistoryKeydown(event, outputEl, outputHistory, outputStatusEl);
+      });
+
+      function handleHistoryKeydown(event, element, history, statusEl) {
+        if (event.key.toLowerCase() !== "z" || !event.ctrlKey) {
+          return;
+        }
+        event.preventDefault();
+        if (event.shiftKey) {
+          const redoValue = history.redo();
+          if (redoValue !== null) {
+            applyHistoryValue(element, redoValue);
+            updateStatus(statusEl, "已前进一步", "success");
+          }
+          return;
+        }
+        const undoValue = history.undo();
+        if (undoValue !== null) {
+          applyHistoryValue(element, undoValue);
+          updateStatus(statusEl, "已回退一步", "success");
+        }
+      }
+
+      function applyHistoryValue(element, value) {
+        element.value = value;
+        resetScroll(element);
+      }
+
+      function setTextValue(element, value, history) {
+        element.value = value;
+        resetScroll(element);
+        history.push(value);
+      }
+
+      function resetScroll(element) {
+        element.scrollLeft = 0;
+        element.scrollTop = 0;
+      }
+
+      async function copyText(element, statusEl) {
+        try {
+          if (!element.value.trim()) {
+            updateStatus(statusEl, "没有可复制的内容", "muted");
+            return;
+          }
+          await navigator.clipboard.writeText(element.value);
+          updateStatus(statusEl, "已复制到剪贴板", "success");
+        } catch (error) {
+          updateStatus(statusEl, "复制失败，请手动选择文本复制", "error");
+        }
+      }
+
+      function updateStatus(statusEl, message, type) {
+        statusEl.textContent = message;
+        statusEl.className = `status ${type || ""}`;
+      }
+    </script>
+  </body>
+</html>
