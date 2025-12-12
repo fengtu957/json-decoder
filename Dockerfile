@@ -5,6 +5,8 @@ RUN apk add --no-cache curl
 WORKDIR /usr/share/nginx/html
 
 COPY index.html ./index.html
+COPY base64.html ./base64.html
+COPY timestamp.html ./timestamp.html
 
 EXPOSE 80
 
